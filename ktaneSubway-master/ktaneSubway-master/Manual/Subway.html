@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Subway — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css">
+    <link rel="stylesheet" type="text/css" href="css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="js/ktane-utils.js"></script>
+    <style>
+        table {
+            margin: 1em auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <div class="page page-bg-01">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Subway</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/Subway.svg" class="diagram">
+                <h2>On the Subject of Subway</h2>
+                <p class="flavour-text">Face Jam covered Subway in episode 21, "Subway BBQ Rib Sandwich", in which the sandwich scored the lowest score yet, with an average score of 14. A year later, it stands as the second lowest scoring food, only 0.2 points above "TGI Fridays Under The Big Top Menu", which Jordan gave a 2.</p>
+
+                <p>Being of the lowest social caste, and not strong enough to work in the salt mines, you have been sent to work at Subway as the only other acceptable job. Destined to spend the rest of your life selling mediocre sandwiches to businessmen and followed by the stench of Subway everywhere you go, you grow more and more apathetic every day. There is only one solace in your hollow existence: messing up people's orders. Not messing up an order enough will lead to the monotonous void of Subway consuming your consciousness, while messing up an order too much will get rid of your tip, causing you to starve to death.</p>
+				
+				<p>Press the "order" button to start the order. Once the customer finishes their order, you will be able to select ingredients. As a proud Subway Sandwich Artist™, you would never make an order out of order, so the order's ingredients will always be ordered in this order: breads, meats, cheese, veggies, and condiments. You can press the tray to select any ingredients, press the arrows to move between ingredients, and press the "next" button to move to the next category. In addition, there is a "?" button that you can press at any time to ask the customer to restate their order. This can be done as many times as you like for no cost other than the customer's sanity.</p>
+				
+				<p>To solve this module, mess up the order with changes whose values add up to as close to the tip threshold as possible without going above it while following all of the rules below. (There can be multiple correct answers.) To get the value of a change, see the table on Page 2. To calculate the tip threshold, take the greatest number from the number of battery holders, port plates, and indicators, and multiply it by 2. If the tip threshold is 0, you are making a sandwich for your coworker, and as the only other human being that has talked to you outside of asking for a sandwich, you don't have the heart to mess up their order.</p>
+				
+				<h4>Rules</h4>
+				<ul>
+					<li>Never remove a vegetable if it is the only vegetable left on the sandwich. It is pertinent to the structural integrity of the sandwich and keeps the fine line between people who say "Ew green stuff," and rational human beings.</li>
+					<li>You always have to toast a sandwich if the customer specifically asks for it. "Melts" should also be toasted, but you may choose not to (which counts as removing cheese). How were you supposed to know to toast the melt?</li>
+				</ul>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 3</div>
+        </div>
+        <div class="page page-bg-02">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Subway</span>
+            </div>
+            <div class="page-content">
+				<ul>
+					<li>If a customer asks for extra of anything, give them the normal amount (i.e. just select the ingredient normally). However, if the customer specifically asks for as much of something that will get you fired, click that ingredient (when you get to it in the sandwich order) until the module solves.</li>
+					<li>Never give a customer whole wheat bread, even if they ask for it. Just pretend you are out of it to spite people who think they are eating healthy by going to Subway, a fast food chain whose "bread" had too much sugar content to be considered bread by the Supreme Court of Ireland.</li>
+					<li>If a customer asks for ketchup, remove it. Whatever is in the sandwich, it's not worth it.</li>
+					<li>If the customer orders a sandwich with tuna in it, substitute the tuna for mayonnaise if there are ingredients other than tuna in the sandwich. They won't be able to tell the difference anyways. (This won't count against the tip threshold.)</li>
+					<li>If a customer has more than 4 veggies on their sandwich, remove veggies until there are 4 on the sandwich, even if it causes you to go past the tip threshold. Never add an item without removing an equivalent item unless otherwise stated. We're a failing restaurant chain, not a soup kitchen.</li>
+					<li>If enough tip threshold is left after previous required changes, always change one of the cheeses if the customer asks for cheese. Literally all of the cheeses are exactly the same with their only differences being food coloring, and you cannot convince me otherwise. Removing does not count as changing, and you should never remove the last cheese.</li>
+					<li>While technically possible while adding the bread, never give the customer a sandwich when they asked for a pizza. Yeah, Subway sells pizza. They even have their own pizza boxes. Don't believe me? Go to your nearest Subway and get one, it's probably better than the sandwich.</li>
+				</ul>
+				
+				<table style="text-align: center; margin: auto;">
+					<tr>
+						<td style="border-top: hidden; border-left: hidden; width: 10%;"></td>
+						<th style="width: 18%;">Bread</th>
+						<th style="width: 18%;">Meat</th>
+						<th style="width: 18%;">Cheese</th>
+						<th style="width: 18%;">Veggies</th>
+						<th style="width: 18%;">Condiments</th>
+					</tr>
+					<tr>
+						<th>Change</th>
+						<td>3</td>
+						<td>4</td>
+						<td>1</td>
+						<td>2</td>
+						<td>3</td>
+					</tr>
+					<tr>
+						<th>Remove</th>
+						<td>∞</td>
+						<td>9</td>
+						<td>4</td>
+						<td>3</td>
+						<td>1</td>
+					</tr>
+				</table>
+				
+				<h4>Clarifications</h4>
+				<ul>
+					<li>Pizza can be found when bread is selectable.</li>
+					<li>Toasting the bread can be chosen when cheese is selectable ("TOAST THE BREAD").</li>
+					<li>Removing or changing an item will always count against the tip threshold unless otherwise stated.</li>
+				</ul>
+            </div>
+            <div class="page-footer relative-footer">Page 2 of 3</div>
+        </div>
+        <div class="page page-bg-03">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Subway</span>
+            </div>
+            <div class="page-content">
+				<h4>Ingredient List</h4>
+				<table style="text-align: center">
+					<tr>
+						<th style="width: 20%">Bread</th>
+						<th style="width: 20%">Meat</th>
+						<th style="width: 20%">Cheese</th>
+						<th style="width: 20%">Vegetable</th>
+						<th style="width: 20%">Condiments</th>
+					</tr>
+					<tr>
+						<td>White</td>
+						<td>Tuna</td>
+						<td>American</td>
+						<td>Olives</td>
+						<td>Ketchup</td>
+					</tr>
+					<tr>
+						<td>Multigrain</td>
+						<td>Chicken</td>
+						<td>Mozzarella</td>
+						<td>Lettuce</td>
+						<td>Mayonnaise</td>
+					</tr>
+					<tr>
+						<td>Gluten Free</td>
+						<td>Turkey</td>
+						<td>Provolone</td>
+						<td>Pickles</td>
+						<td>Ranch</td>
+					</tr>
+					<tr>
+						<td>Whole Wheat</td>
+						<td>Ham</td>
+						<td>Swiss</td>
+						<td>Onions</td>
+						<td>Salt</td>
+					</tr>
+					<tr>
+						<td>Cheese Pizza*</td>
+						<td>Pastrami</td>
+						<td>Cheddar</td>
+						<td>Tomatoes</td>
+						<td>Pepper</td>
+					</tr>
+					<tr>
+						<td style="font-size: 13px;">Pepperoni Pizza*</td>
+						<td>Mystery Meat</td>
+						<td style="font-size: 13px;">Toast the Bread**</td>
+						<td>Jalapeños</td>
+						<td>Vinegar</td>
+					</tr>
+				</table>
+				
+				<p>* not technically bread, but listed under bread<br>** not technically cheese, but listed under cheese</p>
+            </div>
+            <div class="page-footer relative-footer">Page 3 of 3</div>
+        </div>
+    </div>
+</body>
+</html>
