@@ -102,7 +102,7 @@ public class subwayScript : MonoBehaviour {
                 if (orderActivated && !sandwichMade[currentStage].Contains(ingredientPosition)) { sandwichMade[currentStage].Add(ingredientPosition); MoveIngredient(0);
                 ingredientSelectable.AddInteractionPunch();
                 Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, ingredientSelectable.transform); }
-                if (asMuch && (asMuchType == currentStage) && (asMuchPos == ingredientPosition)) { StartCoroutine(AsMuchHandler()); } }
+                if (asMuch && (asMuchType == currentStage) && (order[currentStage][asMuchPos] == ingredientPosition)) { StartCoroutine(AsMuchHandler()); } }
                 return false;
         };
     }
@@ -111,17 +111,17 @@ public class subwayScript : MonoBehaviour {
     {
         pizzaTime = false;
         asMuch = false;
-        //vegetlblbgbelabe = false;
+        // vegetlblbgbelabe = false;
         // speaker = Random.Range(0, 3);
 
         tipThreshold = new int[3] { Info.GetBatteryHolderCount(), Info.GetIndicators().Count(), Info.GetPortPlateCount() }.Max() * 3;
         DebugMsg("The tip threshold is " + tipThreshold + ".");
 
         DebugMsg("The order is...");
-        if (Random.Range(0, 33) == 0) { pizzaTime = true; order[0].Add(Random.Range(4, 6)); DebugMsg(ingredients[0][order[0][0]].Replace('\n', ' ') + "."); }
+        if (Random.Range(0, 6) == 0) { pizzaTime = true; order[0].Add(Random.Range(4, 6)); DebugMsg(ingredients[0][order[0][0]].Replace('\n', ' ') + "."); }
         else
         {
-            if (Random.Range(0, 1) == 0)
+            if (Random.Range(0, 6) == 0)
                 asMuch = true;
             /*else if (Random.Range(0, 25) == 0 && tipThreshold != 0)
             {
@@ -141,7 +141,7 @@ public class subwayScript : MonoBehaviour {
             amounts = new int[] { 1, Random.Range(1, 4), Random.Range(1, 3), Random.Range(1, 6), Random.Range(1, 5) };
 
             int[] shuffledMeaties = { 0, 1, 2, 3, 4, 5 };
-            int[] shuffledCheeses = { 0, 1, 2, 3, 4, 5 };
+            int[] shuffledCheeses = { 0, 1, 2, 3, 4, 0 };
             int[] shuffledVeggies = { 0, 1, 2, 3, 4, 5 };
             int[] shuffledCondoms = { 0, 1, 2, 3, 4, 5 };
             shuffledMeaties.Shuffle();
@@ -223,13 +223,19 @@ public class subwayScript : MonoBehaviour {
         if (Random.Range(0, 10) == 0) { order[2].Add(5); melt = true; DebugMsg("Also, the customer asked for a melt! You should TOAST THE BREAD. Or not."); }
         else if (Random.Range(0, 10) == 0) { order[2].Add(5); DebugMsg("Also, the customer asked you to TOAST THE BREAD."); }
         if (asMuch) {
-            asMuchType = Random.Range(2, 5);
+            asMuchType = Random.Range(1, 5);
             asMuchPos = Random.Range(0, amounts[asMuchType]);
+            while ((asMuchType == 3) && (order[asMuchType][asMuchPos] == 5))
+            {
+                asMuchType = Random.Range(1, 5);
+                asMuchPos = Random.Range(0, amounts[asMuchType]);
+            }
             /* while (order[asMuchType][asMuchPos] == 0 && (asMuchType == 1 || asMuchType == 4))
             {
                 asMuchType = Random.Range(1, 5);
                 asMuchPos = Random.Range(0, order[asMuchType].Count);
             } */
+            // DebugMsg(asMuchType + "type and " + asMuchPos + "pos");
             DebugMsg("Also, the customer asked for as much " + ingredients[asMuchType][order[asMuchType][asMuchPos]] + " that will get you fired! Spam that button when you get to that category.");
         }
         if (pizzaTime) { DebugMsg("Also, the customer asked for a pizza! Get that customer a piece-a' pizza."); };
@@ -266,7 +272,7 @@ public class subwayScript : MonoBehaviour {
         yield return new WaitForSeconds(voiceLines[speaker * 39].length);
         if (pizzaTime)
         {
-            Audio.PlaySoundAtTransform("greeting" + speaker, Module.transform);
+            Audio.PlaySoundAtTransform(audioIngredients[0][order[0].First()] + speaker, Module.transform);
             yield return new WaitForSeconds(voiceLines[speaker * 39 + 6 + order[0].First()].length);
         }
 
@@ -295,7 +301,7 @@ public class subwayScript : MonoBehaviour {
                         yield return new WaitForSeconds(voiceLines[speaker * 39 + 3].length);
                     }
 
-                    if (asMuch && (asMuchType == i) && (asMuchPos == ingredient))
+                    if (asMuch && (asMuchType == i) && (order[i][asMuchPos] == ingredient))
                     {
                         Audio.PlaySoundAtTransform("as much" + speaker, Module.transform);
                         yield return new WaitForSeconds(voiceLines[(speaker + 1) * 39 - 3].length);
@@ -303,12 +309,12 @@ public class subwayScript : MonoBehaviour {
 
                     if (!(i == 2 && ingredient == 5)) // toast the bread goes last
                     {
-                        DebugMsg(i + " " + ingredient);
+                        // DebugMsg(i + " " + ingredient);
                         Audio.PlaySoundAtTransform(audioIngredients[i][ingredient] + speaker, Module.transform);
                         yield return new WaitForSeconds(voiceLines[speaker * 39 + 6 * (i + 1) + ingredient].length);
                     }
 
-                    if (asMuch && (asMuchType == i) && (asMuchPos == ingredient))
+                    if (asMuch && (asMuchType == i) && (order[i][asMuchPos] == ingredient))
                     {
                         Audio.PlaySoundAtTransform("fired" + speaker, Module.transform);
                         yield return new WaitForSeconds(voiceLines[(speaker + 1) * 39 - 2].length);
@@ -545,7 +551,7 @@ public class subwayScript : MonoBehaviour {
     IEnumerator AsMuchHandler()
     {
         asMuchCounter++;
-        DebugMsg(asMuchCounter.ToString());
+        // DebugMsg(asMuchCounter.ToString());
         if (asMuchCounter >= 30)
         {
             solved = true;

@@ -13,12 +13,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: subway
   title: Subway
-  author: EpicToast
-  description: "Face Jam covered Subway in episode 21, \"Subway BBQ Rib Sandwich\",
-    in which the sandwich scored the lowest score yet, with an average score of 14.
-    A year later, it stands as the second lowest scoring food, only 0.2 points above
-    \"TGI Fridays Under The Big Top Menu\", which Jordan gave a 2.\r\n\r\nModule ID:
-    subway\nManual: https://ktane.timwi.de/HTML/Subway.html"
-  version: v1.0
+  author: BlvdBroken and EpicToast
+  description: "Listen to Face Jam.\n\r\nModule ID: subway\nManual: https://ktane.timwi.de/HTML/Subway.html"
+  version: 0.9
   outputFolder: build
-  previewImage: {fileID: 0}
+  previewImage: {fileID: 2800000, guid: 15669ff93eae5ae4ca3df3f01d101898, type: 3}
