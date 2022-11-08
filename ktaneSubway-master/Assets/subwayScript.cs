@@ -27,6 +27,18 @@ public class subwayScript : MonoBehaviour {
     bool solved = false;
     private bool orderPlaying = false;
 
+    private double Voltage() // shamelessly stolen from Access Codes, thanks GhostSalt
+    {
+        if (Info.QueryWidgets("volt", "").Count() != 0)
+        {
+            double TempVoltage = double.Parse(Info.QueryWidgets("volt", "")[0].Substring(12).Replace("\"}", ""));
+            return TempVoltage;
+            //return PublicVoltage;
+        }
+        return 0;
+        //return -PublicVoltage;
+    }
+
     // Normal variables
 
     int tipThreshold = 0;
@@ -49,6 +61,7 @@ public class subwayScript : MonoBehaviour {
     // Order related variables
 
     List<int>[] order = { new List<int>(), new List<int>(), new List<int>(), new List<int>(), new List<int>() };
+    List<int>[] sayorder = { new List<int>(), new List<int>(), new List<int>(), new List<int>(), new List<int>() };
     int ingredientCount = 0;
     bool melt = false;
 
@@ -69,9 +82,9 @@ public class subwayScript : MonoBehaviour {
         3, 4, 1, 2, 2, // change
         0, 9, 4, 3, 2 // remove
     };
-    int[] additions = { 0, 0, 0, 0, 0 };
+    /*int[] additions = { 0, 0, 0, 0, 0 };
     int[] changes = { 0, 0, 0, 0, 0 };
-    int[] deletions = { 0, 0, 0, 0, 0 };
+    int[] deletions = { 0, 0, 0, 0, 0 };*/
 
     int speaker = 2;
     /*static readonly float[][] audioLengths =
@@ -112,16 +125,17 @@ public class subwayScript : MonoBehaviour {
         pizzaTime = false;
         asMuch = false;
         // vegetlblbgbelabe = false;
-        // speaker = Random.Range(0, 3);
+        speaker = Random.Range(0, 3);
 
         tipThreshold = new int[3] { Info.GetBatteryHolderCount(), Info.GetIndicators().Count(), Info.GetPortPlateCount() }.Max() * 3;
+        tipThreshold += (int)Voltage();
         DebugMsg("The tip threshold is " + tipThreshold + ".");
 
         DebugMsg("The order is...");
-        if (Random.Range(0, 6) == 0) { pizzaTime = true; order[0].Add(Random.Range(4, 6)); DebugMsg(ingredients[0][order[0][0]].Replace('\n', ' ') + "."); }
+        if (Random.Range(0, 2) == 0) { pizzaTime = true; order[0].Add(Random.Range(4, 6)); DebugMsg(ingredients[0][order[0][0]].Replace('\n', ' ') + "."); }
         else
         {
-            if (Random.Range(0, 6) == 0)
+            if (Random.Range(0, 2) == 0)
                 asMuch = true;
             /*else if (Random.Range(0, 25) == 0 && tipThreshold != 0)
             {
@@ -217,6 +231,8 @@ public class subwayScript : MonoBehaviour {
             for (int i = 0; i < 5; i++)
                 foreach (var ingredient in order[i])
                     DebugMsg(ingredients[i][ingredient]);
+
+            sayorder = order;
             
         }
         
@@ -272,10 +288,13 @@ public class subwayScript : MonoBehaviour {
         yield return new WaitForSeconds(voiceLines[speaker * 39].length);
         if (pizzaTime)
         {
-            Audio.PlaySoundAtTransform(audioIngredients[0][order[0].First()] + speaker, Module.transform);
-            yield return new WaitForSeconds(voiceLines[speaker * 39 + 6 + order[0].First()].length);
+            Debug.LogFormat("pizza time");
+            Debug.LogFormat("{0}", audioIngredients[0][sayorder[0].First()] + speaker);
+            Audio.PlaySoundAtTransform(audioIngredients[0][sayorder[0].First()] + speaker, Module.transform);
+            Debug.LogFormat("after play");
+            yield return new WaitForSeconds(voiceLines[speaker * 39 + 6 + sayorder[0].First()].length);
+            Debug.LogFormat("after wait");
         }
-
         else
         {
             if (melt)
@@ -291,17 +310,17 @@ public class subwayScript : MonoBehaviour {
 
             for (int i = 0; i < 5; i++)
             {
-                foreach (var ingredient in order[i])
+                foreach (var ingredient in sayorder[i])
                 {
-                    DebugMsg("order[i] is " + order[i].Join());
+                    //DebugMsg("order[i] is " + order[i].Join());
                     
-                    if (i == 4 && ingredient == order[4].Last()) // say "and" after all ingredients except the last
+                    if (i == 4 && ingredient == sayorder[4].Last()) // say "and" after all ingredients except the last
                     {
                         Audio.PlaySoundAtTransform("and" + speaker, Module.transform);
                         yield return new WaitForSeconds(voiceLines[speaker * 39 + 3].length);
                     }
 
-                    if (asMuch && (asMuchType == i) && (order[i][asMuchPos] == ingredient))
+                    if (asMuch && (asMuchType == i) && (sayorder[i][asMuchPos] == ingredient))
                     {
                         Audio.PlaySoundAtTransform("as much" + speaker, Module.transform);
                         yield return new WaitForSeconds(voiceLines[(speaker + 1) * 39 - 3].length);
@@ -314,7 +333,7 @@ public class subwayScript : MonoBehaviour {
                         yield return new WaitForSeconds(voiceLines[speaker * 39 + 6 * (i + 1) + ingredient].length);
                     }
 
-                    if (asMuch && (asMuchType == i) && (order[i][asMuchPos] == ingredient))
+                    if (asMuch && (asMuchType == i) && (sayorder[i][asMuchPos] == ingredient))
                     {
                         Audio.PlaySoundAtTransform("fired" + speaker, Module.transform);
                         yield return new WaitForSeconds(voiceLines[(speaker + 1) * 39 - 2].length);
@@ -323,7 +342,7 @@ public class subwayScript : MonoBehaviour {
                 }
             }
 
-            if (order[2].Contains(5))
+            if (sayorder[2].Contains(5))
                 Audio.PlaySoundAtTransform(audioIngredients[2][5] + speaker, Module.transform);
         }
         
@@ -357,6 +376,9 @@ public class subwayScript : MonoBehaviour {
 
             if (currentStage == 5)
             {
+                int[] additions = { 0, 0, 0, 0, 0 };
+                int[] changes = { 0, 0, 0, 0, 0 };
+                int[] deletions = { 0, 0, 0, 0, 0 };
                 trayRenderer.material = trayMat;
                 ingredientText.text = "";
                 orderActivated = false;
@@ -398,19 +420,32 @@ public class subwayScript : MonoBehaviour {
                     for (int i = 0; i < 5; i++)
                     {
                         if (order[i].Count < sandwichMade[i].Count)
+                        {
                             DebugMsg("You added extra " + stageNames[i] + ".");
+                            sandwichCorrect = false;
+                            reasonsWhy.Add("... you added an item when you weren't supposed to!");
+                        }
                         else
                         {
                             foreach (var ingredient in order[i])
-                                if (!sandwichMade[i].Contains(ingredient))
+                            {
+                                Debug.LogFormat("{0} {1}", ingredient, sandwichMade[i].Contains(ingredient));
+                                if (!(sandwichMade[i].Contains(ingredient)))
                                 {
                                     if (sandwichMade[i].Count + deletions[i] - additions[i] > order[i].Count)
+                                    {
                                         additions[i]++;
+                                    }
                                     else if (sandwichMade[i].Count + deletions[i] - additions[i] == order[i].Count)
+                                    {
                                         changes[i]++;
+                                    }
                                     else
+                                    {
                                         deletions[i]++;
+                                    }
                                 }
+                            }
 
                             DebugMsg("You changed " + changes[i] + " " + stageNames[i] + ".");
                             DebugMsg("You deleted " + deletions[i] + " " + stageNames[i] + ".");
@@ -418,6 +453,13 @@ public class subwayScript : MonoBehaviour {
                             changeValues += changeTable[i] * changes[i];
                             changeValues += changeTable[i + 5] * deletions[i];
                         }
+                    }
+
+                    for (int i = 0; i < 5; i++)
+                    {
+                        Debug.LogFormat("{0} Additions / {1}", i, additions[i]);
+                        Debug.LogFormat("{0} Changes / {1}", i, changes[i]);
+                        Debug.LogFormat("{0} Deletions / {1}", i, deletions[i]);
                     }
 
                     if (changeCheese && changes[2] == 0)
@@ -464,7 +506,7 @@ public class subwayScript : MonoBehaviour {
                         }   
                         else
                         {
-                            DebugMsg("Your sandwich is valid, but isn't close enough to the tip threshold!");
+                            reasonsWhy.Add("... your isn't close enough to the tip threshold!");
                             DebugMsg("Calculated solution:");
                             for (int i = 0; i < 5; i++)
                             {
@@ -497,6 +539,11 @@ public class subwayScript : MonoBehaviour {
                 }
                 else
                 {
+                    DebugMsg("Your sandwhich was not valid because:");
+                    foreach (var reason in reasonsWhy)
+                    {
+                        DebugMsg(reason);
+                    }
                     Audio.PlaySoundAtTransform("failure" + speaker, Module.transform);
                     yield return new WaitForSeconds(voiceLines[speaker * 39 + 5].length);
                     Module.HandleStrike();
