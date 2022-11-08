@@ -132,10 +132,15 @@ public class subwayScript : MonoBehaviour {
         DebugMsg("The tip threshold is " + tipThreshold + ".");
 
         DebugMsg("The order is...");
-        if (Random.Range(0, 2) == 0) { pizzaTime = true; order[0].Add(Random.Range(4, 6)); DebugMsg(ingredients[0][order[0][0]].Replace('\n', ' ') + "."); }
+        if (Random.Range(0, 20) == 0)
+        {
+            pizzaTime = true;
+            order[0].Add(Random.Range(4, 6));
+            DebugMsg(ingredients[0][order[0][0]].Replace('\n', ' ') + ".");
+        }
         else
         {
-            if (Random.Range(0, 2) == 0)
+            if (Random.Range(0, 20) == 0)
                 asMuch = true;
             /*else if (Random.Range(0, 25) == 0 && tipThreshold != 0)
             {
@@ -149,8 +154,14 @@ public class subwayScript : MonoBehaviour {
             }*/
 
             // add bread (if there's not enough tip threshold, don't add whole wheat bread)
-            if (requiredChangeValues + 3 <= tipThreshold) { order[0].Add(Random.Range(0, 3)); requiredChangeValues += 3; }
-            else { order[0].Add(Random.Range(0, 4)); }
+            if (requiredChangeValues + 3 <= tipThreshold)
+            {
+                order[0].Add(Random.Range(0, 3)); requiredChangeValues += 3;
+            }
+            else
+            {
+                order[0].Add(Random.Range(0, 4));
+            }
 
             amounts = new int[] { 1, Random.Range(1, 4), Random.Range(1, 3), Random.Range(1, 6), Random.Range(1, 5) };
 
@@ -231,10 +242,10 @@ public class subwayScript : MonoBehaviour {
             for (int i = 0; i < 5; i++)
                 foreach (var ingredient in order[i])
                     DebugMsg(ingredients[i][ingredient]);
-
-            sayorder = order;
-            
+        
         }
+
+        sayorder = order; // new order variable so tuna doesnt mess up
         
         if (Random.Range(0, 10) == 0) { order[2].Add(5); melt = true; DebugMsg("Also, the customer asked for a melt! You should TOAST THE BREAD. Or not."); }
         else if (Random.Range(0, 10) == 0) { order[2].Add(5); DebugMsg("Also, the customer asked you to TOAST THE BREAD."); }
@@ -288,12 +299,8 @@ public class subwayScript : MonoBehaviour {
         yield return new WaitForSeconds(voiceLines[speaker * 39].length);
         if (pizzaTime)
         {
-            Debug.LogFormat("pizza time");
-            Debug.LogFormat("{0}", audioIngredients[0][sayorder[0].First()] + speaker);
-            Audio.PlaySoundAtTransform(audioIngredients[0][sayorder[0].First()] + speaker, Module.transform);
-            Debug.LogFormat("after play");
+            Audio.PlaySoundAtTransform(audioIngredients[0][sayorder[0][0]] + speaker, Module.transform);
             yield return new WaitForSeconds(voiceLines[speaker * 39 + 6 + sayorder[0].First()].length);
-            Debug.LogFormat("after wait");
         }
         else
         {
