@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using KModkit;
 using System.Linq;
+using System;
 
 public class subwayScript : MonoBehaviour {
 
@@ -53,6 +54,12 @@ public class subwayScript : MonoBehaviour {
         new string[6] { "KETCHUP", "MAYONNAISE", "RANCH", "SALT", "PEPPER", "VINEGAR" }
     };
 
+    static readonly string[] sortTPList =
+    {
+        "white", "multigrain", "gluten", "whole", "cheese", "pepperoni", "tuna", "chicken", "turkey", "ham", "pastrami", "mystery", "american", "mozzarella", "provolone", "swiss", "cheddar", "toast", "olives", "lettuce", "pickles", "onions", "tomatoes", "jalapenos", "ketchup", "mayonnaise", "ranch", "salt", "pepper", "vinegar"
+    };
+    int pressno = 0;
+
     bool orderActivated = false;
     int currentStage = 0;
     static readonly string[] stageNames = { "bread(s)", "meat(s)", "cheese(s)", "veggie(s)", "condiment(s)" };
@@ -70,7 +77,7 @@ public class subwayScript : MonoBehaviour {
     int asMuchPos = 0;
     int asMuchType = 0;
     int asMuchCounter = 0;
-    bool vegetlblbgbelabe = false;
+    //bool vegetlblbgbelabe = false;
     bool replaceTuna = false;
     bool changeCheese = false;
 
@@ -107,16 +114,54 @@ public class subwayScript : MonoBehaviour {
         for (int i = 0; i < 2; i++)
         {
             int j = i;
-            arrowSelectables[i].OnInteract += delegate () { if (!solved) { MoveIngredient(j * 2 - 1); arrowSelectables[j].AddInteractionPunch(); Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, arrowSelectables[j].transform); } return false; };
-        }
-        repeatSelectable.OnInteract += delegate () { if (!solved && !orderPlaying) { StartCoroutine(SayOrder()); repeatSelectable.AddInteractionPunch(); Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, repeatSelectable.transform); } return false; };
-        orderSelectable.OnInteract += delegate () { if (!solved && !orderPlaying) { StartCoroutine(AdvanceStage()); orderSelectable.AddInteractionPunch(); Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, orderSelectable.transform); } return false; };
-        ingredientSelectable.OnInteract += delegate () { if (!solved) {
-                if (orderActivated && !sandwichMade[currentStage].Contains(ingredientPosition)) { sandwichMade[currentStage].Add(ingredientPosition); MoveIngredient(0);
-                ingredientSelectable.AddInteractionPunch();
-                Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, ingredientSelectable.transform); }
-                if (asMuch && (asMuchType == currentStage) && (order[currentStage][asMuchPos] == ingredientPosition)) { StartCoroutine(AsMuchHandler()); } }
+            arrowSelectables[i].OnInteract += delegate ()
+            {
+                if (!solved)
+                {
+                    MoveIngredient(j * 2 - 1);
+                    arrowSelectables[j].AddInteractionPunch();
+                    Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, arrowSelectables[j].transform);
+                }
                 return false;
+            };
+        }
+        repeatSelectable.OnInteract += delegate ()
+        {
+            if (!solved && !orderPlaying)
+            {
+                StartCoroutine(SayOrder());
+                repeatSelectable.AddInteractionPunch();
+                Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, repeatSelectable.transform);
+            }
+            return false;
+        };
+        orderSelectable.OnInteract += delegate ()
+        {
+            if (!solved && !orderPlaying)
+            {
+                StartCoroutine(AdvanceStage());
+                orderSelectable.AddInteractionPunch();
+                Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, orderSelectable.transform);
+            }
+            return false;
+        };
+        ingredientSelectable.OnInteract += delegate ()
+        {
+            if (!solved)
+            {
+                if (orderActivated && !sandwichMade[currentStage].Contains(ingredientPosition))
+                {
+                    sandwichMade[currentStage].Add(ingredientPosition);
+                    MoveIngredient(0);
+                    ingredientSelectable.AddInteractionPunch();
+                    Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, ingredientSelectable.transform);
+                }
+                if (asMuch && (asMuchType == currentStage) && (order[currentStage][asMuchPos] == ingredientPosition))
+                {
+                    StartCoroutine(AsMuchHandler());
+                }
+            }
+            return false;
         };
     }
 
@@ -125,28 +170,29 @@ public class subwayScript : MonoBehaviour {
         pizzaTime = false;
         asMuch = false;
         // vegetlblbgbelabe = false;
-        speaker = Random.Range(0, 3);
+        speaker = UnityEngine.Random.Range(0, 3);
+        Debug.LogFormat("Speaker is {0}", speaker);
 
         tipThreshold = new int[3] { Info.GetBatteryHolderCount(), Info.GetIndicators().Count(), Info.GetPortPlateCount() }.Max() * 3;
         tipThreshold += (int)Voltage();
         DebugMsg("The tip threshold is " + tipThreshold + ".");
 
         DebugMsg("The order is...");
-        if (Random.Range(0, 20) == 0)
+        if (UnityEngine.Random.Range(0, 20) == 0)
         {
             pizzaTime = true;
-            order[0].Add(Random.Range(4, 6));
+            order[0].Add(UnityEngine.Random.Range(4, 6));
             DebugMsg(ingredients[0][order[0][0]].Replace('\n', ' ') + ".");
         }
         else
         {
-            if (Random.Range(0, 20) == 0)
+            if (UnityEngine.Random.Range(0, 20) == 0)
                 asMuch = true;
-            /*else if (Random.Range(0, 25) == 0 && tipThreshold != 0)
+            /*else if (UnityEngine.Random.Range(0, 25) == 0 && tipThreshold != 0)
             {
                 vegetlblbgbelabe = true;
                 int[] shuffledArray = { 0, 1, 2, 3, 4, 5 };
-                int veggieCount = Random.Range(5, 7);
+                int veggieCount = UnityEngine.Random.Range(5, 7);
                 shuffledArray.Shuffle(); 
                 for (int j = 0; j < veggieCount; j++)
                     order[3].Add(shuffledArray[j]);
@@ -154,19 +200,19 @@ public class subwayScript : MonoBehaviour {
             }*/
 
             // add bread (if there's not enough tip threshold, don't add whole wheat bread)
-            if (requiredChangeValues + 3 <= tipThreshold)
+            if (tipThreshold < 3)
             {
-                order[0].Add(Random.Range(0, 3)); requiredChangeValues += 3;
+                order[0].Add(UnityEngine.Random.Range(0, 3));
             }
             else
             {
-                order[0].Add(Random.Range(0, 4));
+                order[0].Add(UnityEngine.Random.Range(0, 4));
             }
 
-            amounts = new int[] { 1, Random.Range(1, 4), Random.Range(1, 3), Random.Range(1, 6), Random.Range(1, 5) };
+            amounts = new int[] { 1, UnityEngine.Random.Range(1, 4), UnityEngine.Random.Range(1, 3), UnityEngine.Random.Range(1, 6), UnityEngine.Random.Range(1, 5) };
 
             int[] shuffledMeaties = { 0, 1, 2, 3, 4, 5 };
-            int[] shuffledCheeses = { 0, 1, 2, 3, 4, 0 };
+            int[] shuffledCheeses = { 0, 1, 2, 3, 4 };
             int[] shuffledVeggies = { 0, 1, 2, 3, 4, 5 };
             int[] shuffledCondoms = { 0, 1, 2, 3, 4, 5 };
             shuffledMeaties.Shuffle();
@@ -191,13 +237,13 @@ public class subwayScript : MonoBehaviour {
                 }
             }
 
-            /*ingredientCount = Random.Range(6, 10);
+            /*ingredientCount = UnityEngine.Random.Range(6, 10);
             if (vegetlblbgbelabe)
-                ingredientCount = Random.Range(2, 5);
+                ingredientCount = UnityEngine.Random.Range(2, 5);
 
             for (int i = 0; i < ingredientCount; i++)
             {
-                int placeholder = Random.Range(1, 5);
+                int placeholder = UnityEngine.Random.Range(1, 5);
                 if (order[1].Count == 0)
                     placeholder = 1;
                 else if (order[2].Count == 0)
@@ -207,27 +253,27 @@ public class subwayScript : MonoBehaviour {
                 else if (order[4].Count == 0)
                     placeholder = 4;
                 while (order[placeholder].Count >= 4 || (order[2].Count == 1 && placeholder == 2))
-                    placeholder = Random.Range(1, 5);
+                    placeholder = UnityEngine.Random.Range(1, 5);
 
-                int placeholderIngredient = Random.Range(0, 6);
+                int placeholderIngredient = UnityEngine.Random.Range(0, 6);
 
                 switch (placeholder)
                 {
                     case 1: // meats
                         while (order[placeholder].Contains(placeholderIngredient) || (order[4].Contains(1) && placeholderIngredient == 0))
-                            placeholderIngredient = Random.Range(0, 6);
+                            placeholderIngredient = UnityEngine.Random.Range(0, 6);
                             break;
                     case 2: // cheese
                         while (order[placeholder].Contains(placeholderIngredient))
-                            placeholderIngredient = Random.Range(0, 5);
+                            placeholderIngredient = UnityEngine.Random.Range(0, 5);
                         break;
                     case 3: // veggies
                         while (order[placeholder].Contains(placeholderIngredient))
-                            placeholderIngredient = Random.Range(0, 6);
+                            placeholderIngredient = UnityEngine.Random.Range(0, 6);
                         break;
                     case 4: // condiments
                         while (order[placeholder].Contains(placeholderIngredient) || (requiredChangeValues + 1 <= tipThreshold && placeholderIngredient == 0) || (order[1].Contains(0) && placeholderIngredient == 1))
-                            placeholderIngredient = Random.Range(0, 6);
+                            placeholderIngredient = UnityEngine.Random.Range(0, 6);
                         if (placeholderIngredient == 0)
                             requiredChangeValues += 1;
                         break;
@@ -247,30 +293,61 @@ public class subwayScript : MonoBehaviour {
 
         sayorder = order; // new order variable so tuna doesnt mess up
         
-        if (Random.Range(0, 10) == 0) { order[2].Add(5); melt = true; DebugMsg("Also, the customer asked for a melt! You should TOAST THE BREAD. Or not."); }
-        else if (Random.Range(0, 10) == 0) { order[2].Add(5); DebugMsg("Also, the customer asked you to TOAST THE BREAD."); }
+        if (UnityEngine.Random.Range(0, 10) == 0)
+        {
+            order[2].Add(5);
+            melt = true;
+            DebugMsg("Also, the customer asked for a melt! You should TOAST THE BREAD. Or not.");
+        }
+        else if (UnityEngine.Random.Range(0, 10) == 0)
+        {
+            order[2].Add(5);
+            DebugMsg("Also, the customer asked you to TOAST THE BREAD.");
+        }
         if (asMuch) {
-            asMuchType = Random.Range(1, 5);
-            asMuchPos = Random.Range(0, amounts[asMuchType]);
+            asMuchType = UnityEngine.Random.Range(1, 5);
+            asMuchPos = UnityEngine.Random.Range(0, amounts[asMuchType]);
             while ((asMuchType == 3) && (order[asMuchType][asMuchPos] == 5))
             {
-                asMuchType = Random.Range(1, 5);
-                asMuchPos = Random.Range(0, amounts[asMuchType]);
+                asMuchType = UnityEngine.Random.Range(1, 5);
+                asMuchPos = UnityEngine.Random.Range(0, amounts[asMuchType]);
             }
             /* while (order[asMuchType][asMuchPos] == 0 && (asMuchType == 1 || asMuchType == 4))
             {
-                asMuchType = Random.Range(1, 5);
-                asMuchPos = Random.Range(0, order[asMuchType].Count);
+                asMuchType = UnityEngine.Random.Range(1, 5);
+                asMuchPos = UnityEngine.Random.Range(0, order[asMuchType].Count);
             } */
             // DebugMsg(asMuchType + "type and " + asMuchPos + "pos");
             DebugMsg("Also, the customer asked for as much " + ingredients[asMuchType][order[asMuchType][asMuchPos]] + " that will get you fired! Spam that button when you get to that category.");
         }
-        if (pizzaTime) { DebugMsg("Also, the customer asked for a pizza! Get that customer a piece-a' pizza."); };
-        if (order[0].Contains(6)) { DebugMsg("Also, the customer asked for whole wheat bread! Change it."); }
-        if (order[4].Contains(0)) { DebugMsg("Also, the customer asked for ketchup! Either remove it or change it."); }
-        if (order[1].Contains(0)) { replaceTuna = true; DebugMsg("Also, the customer asked for tuna! Make it mayonnaise."); }
-        // if (order[3].Count > 6) { DebugMsg("Also, the customer asked for more than 6 veggies! Get rid of them until there's 6."); }
-        if (requiredChangeValues <= tipThreshold) { changeCheese = true; DebugMsg("Also, there's still tip threshold remaining after all required changes! Change the cheese."); requiredChangeValues += 1; }
+        else if (pizzaTime)
+        {
+            DebugMsg("The customer asked for a pizza! Get that customer a piece-a' pizza.");
+        }
+        else
+        {
+            if (order[0].Contains(3))
+            {
+                DebugMsg("Also, the customer asked for whole wheat bread! Change it.");
+                requiredChangeValues += 3;
+            }
+            if (order[4].Contains(0))
+            {
+                DebugMsg("Also, the customer asked for ketchup! Either remove it or change it.");
+            }
+            if (order[1].Contains(0))
+            {
+                replaceTuna = true;
+                DebugMsg("Also, the customer asked for tuna! Make it mayonnaise.");
+            }
+            // if (order[3].Count > 6) { DebugMsg("Also, the customer asked for more than 6 veggies! Get rid of them until there's 6."); }
+            if (requiredChangeValues < tipThreshold)
+            {
+                changeCheese = true;
+                DebugMsg("Also, there's still tip threshold remaining after all required changes! Change the cheese.");
+                requiredChangeValues += 1;
+            }
+        }
 
         // order[1].Remove(0);
     }
@@ -400,22 +477,50 @@ public class subwayScript : MonoBehaviour {
 
                 if (pizzaTime)
                 {
-                    if(!(sandwichMade[0].Contains(4) || sandwichMade[0].Contains(5)) || ((sandwichMade[0].Contains(0) || sandwichMade[0].Contains(1) || sandwichMade[0].Contains(2) || sandwichMade[0].Contains(3))))
+                    if (!(sandwichMade[0].Contains(4) || sandwichMade[0].Contains(5)) || ((sandwichMade[0].Contains(0) || sandwichMade[0].Contains(1) || sandwichMade[0].Contains(2) || sandwichMade[0].Contains(3))))
                     {
                         sandwichCorrect = false;
                     }
                 }
                 else
                 {
-                    if (sandwichMade[0].Count == 0) { sandwichCorrect = false; yield return ATONEFORYOURSINS(); }
-                    if (sandwichMade[3].Count == 0) { sandwichCorrect = false; reasonsWhy.Add("... you got rid of the last vegetable on the sandwich!"); }
-                    if (asMuch) { sandwichCorrect = false; reasonsWhy.Add("... you didn't spam the " + ingredients[asMuchType][order[asMuchType][asMuchPos]] + " button!"); }
-                    if (sandwichMade[0].Contains(6)) { sandwichCorrect = false; reasonsWhy.Add("... you gave the customer whole wheat bread!"); }
-                    if (sandwichMade[4].Contains(0) && order[4].Contains(0)) { sandwichCorrect = false; reasonsWhy.Add("... you gave the customer ketchup when they asked for it!"); }
-                    if (order[1].Contains(0) && (sandwichMade[1].Contains(0) || !sandwichMade[4].Contains(1))) { sandwichCorrect = false; reasonsWhy.Add("... you didn't replace the tuna with mayonnaise!"); } // this might be weird. you can't change/remove the substituted mayo
+                    if (sandwichMade[0].Count == 0)
+                    { 
+                        sandwichCorrect = false;
+                        yield return ATONEFORYOURSINS();
+                    }
+                    if (sandwichMade[3].Count == 0)
+                    {
+                        sandwichCorrect = false;
+                        reasonsWhy.Add("... you got rid of the last vegetable on the sandwich!");
+                    }
+                    if (asMuch) 
+                    {
+                        sandwichCorrect = false;
+                        reasonsWhy.Add("... you didn't spam the " + ingredients[asMuchType][order[asMuchType][asMuchPos]] + " button!");
+                    }
+                    if (sandwichMade[0].Contains(3))
+                    {
+                        sandwichCorrect = false;
+                        reasonsWhy.Add("... you gave the customer whole wheat bread!");
+                    }
+                    if (sandwichMade[4].Contains(0) && order[4].Contains(0))
+                    {
+                        sandwichCorrect = false;
+                        reasonsWhy.Add("... you gave the customer ketchup when they asked for it!");
+                    }
+                    if (order[1].Contains(0) && (sandwichMade[1].Contains(0) || !sandwichMade[4].Contains(1)))
+                    {
+                        sandwichCorrect = false;
+                        reasonsWhy.Add("... you didn't replace the tuna with mayonnaise!");
+                    } // this might be weird. you can't change/remove the substituted mayo
                     // if (sandwichMade[3].Count > 6 && order[3].Count > 6) { sandwichCorrect = false; reasonsWhy.Add("... you didn't get rid of veggies until there were less than 6 on the sandwich!"); }
                     // if (changeCheese && order[2].Where(x => x != 5) == sandwichMade[2].Where(x => x != 5)) { sandwichCorrect = false; reasonsWhy.Add("... you didn't change the cheese when you had the chance!"); }
-                    if (order[0].Count < sandwichMade[0].Count || order[1].Count < sandwichMade[1].Count || order[2].Count < sandwichMade[2].Count || order[3].Count < sandwichMade[3].Count || (replaceTuna && order[4].Count < sandwichMade[4].Count - 1) || (!replaceTuna && order[4].Count < sandwichMade[4].Count)) { sandwichCorrect = false; reasonsWhy.Add("... you added an extra ingredient without removing an equivalent one!"); }
+                    /*if (order[0].Count < sandwichMade[0].Count || order[1].Count < sandwichMade[1].Count || order[2].Count < sandwichMade[2].Count || order[3].Count < sandwichMade[3].Count || (replaceTuna && order[4].Count < sandwichMade[4].Count - 1) || (!replaceTuna && order[4].Count < sandwichMade[4].Count))
+                    {
+                        sandwichCorrect = false;
+                        reasonsWhy.Add("... you added an extra ingredient without removing an equivalent one!");
+                    }*/
 
                     changeValues = 0;
                     if (replaceTuna) // replace tuna with mayo for this part
@@ -477,6 +582,8 @@ public class subwayScript : MonoBehaviour {
 
                     DebugMsg("The total value of your changes is " + changeValues + ".");
 
+                    Debug.LogFormat("changeValues is {0} and requiredChangeValues is {1}", changeValues, requiredChangeValues);
+
                     if ((changeValues > tipThreshold + 9) ? replaceTuna : (changeValues > tipThreshold))
                     {
                         sandwichCorrect = false;
@@ -496,24 +603,69 @@ public class subwayScript : MonoBehaviour {
                         // if (order[3].Count > 6) { tempModifications[3] += order[3].Count - 6; } // remove veggies until there are 6
                         if (changeCheese) { tempModifications[2]++; }
 
-                        while (remainingThreshold >= 9 && order[1].Count() - tempModifications[1] > 0) { tempModifications[1]++; tempRemovals[1]++; remainingThreshold -= 9; } // remove meat
-                        while (remainingThreshold >= 4 && order[2].Count() - tempModifications[2] > 0) { tempModifications[2]++; tempRemovals[2]++; remainingThreshold -= 4; } // remove cheese
-                        while (remainingThreshold >= 4 && order[1].Count() - tempModifications[1] > 0) { tempModifications[1]++; tempChanges[1]++; remainingThreshold -= 4; } // change meat
-                        while (remainingThreshold >= 3 && order[0].Count() - tempModifications[0] > 0) { tempModifications[0]++; tempChanges[0]++; remainingThreshold -= 3; } // change bread
-                        while (remainingThreshold >= 3 && order[3].Count() - tempModifications[3] > 0) { tempModifications[3]++; tempRemovals[3]++; remainingThreshold -= 3; } // remove veggie
-                        while (remainingThreshold >= 3 && order[4].Count() - tempModifications[4] > 0) { tempModifications[4]++; tempChanges[4]++; remainingThreshold -= 3; } // change condiment
-                        while (remainingThreshold >= 2 && order[3].Count() - tempModifications[3] > 0) { tempModifications[3]++; tempChanges[3]++; remainingThreshold -= 2; } // change veggie
-                        while (remainingThreshold >= 1 && order[2].Count() - tempModifications[2] > 0) { tempModifications[2]++; tempChanges[2]++; remainingThreshold -= 1; } // change cheese
-                        while (remainingThreshold >= 1 && order[4].Count() - tempModifications[4] > 0) { tempModifications[4]++; tempRemovals[4]++; remainingThreshold -= 1; } // remove condiment
+                        while (remainingThreshold >= 9 && order[1].Count() - tempModifications[1] > 0)
+                        {
+                            tempModifications[1]++;
+                            tempRemovals[1]++;
+                            remainingThreshold -= 9;
+                        } // remove meat
+                        while (remainingThreshold >= 4 && order[2].Count() - tempModifications[2] > 0)
+                        {
+                            tempModifications[2]++;
+                            tempRemovals[2]++;
+                            remainingThreshold -= 4;
+                        } // remove cheese
+                        while (remainingThreshold >= 4 && order[1].Count() - tempModifications[1] > 0)
+                        {
+                            tempModifications[1]++;
+                            tempChanges[1]++;
+                            remainingThreshold -= 4;
+                        } // change meat
+                        while (remainingThreshold >= 3 && order[0].Count() - tempModifications[0] > 0)
+                        {
+                            tempModifications[0]++;
+                            tempChanges[0]++;
+                            remainingThreshold -= 3;
+                        } // change bread
+                        while (remainingThreshold >= 3 && order[3].Count() - tempModifications[3] > 0)
+                        {
+                            tempModifications[3]++;
+                            tempRemovals[3]++;
+                            remainingThreshold -= 3;
+                        } // remove veggie
+                        while (remainingThreshold >= 3 && order[4].Count() - tempModifications[4] > 0)
+                        {
+                            tempModifications[4]++;
+                            tempChanges[4]++;
+                            remainingThreshold -= 3;
+                        } // change condiment
+                        while (remainingThreshold >= 2 && order[3].Count() - tempModifications[3] > 0)
+                        {
+                            tempModifications[3]++;
+                            tempChanges[3]++;
+                            remainingThreshold -= 2;
+                        } // change veggie
+                        while (remainingThreshold >= 1 && order[2].Count() - tempModifications[2] > 0)
+                        {
+                            tempModifications[2]++;
+                            tempChanges[2]++;
+                            remainingThreshold -= 1;
+                        } // change cheese
+                        while (remainingThreshold >= 1 && order[4].Count() - tempModifications[4] > 0)
+                        {
+                            tempModifications[4]++;
+                            tempRemovals[4]++;
+                            remainingThreshold -= 1;
+                        } // remove condiment
 
                         if ((remainingThreshold == tipThreshold - changeValues + 9) ? replaceTuna : (remainingThreshold == tipThreshold - changeValues))
                         {
                             DebugMsg("Your sandwich is valid and is close enough to the tip threshold!");
-                            sandwichCorrect = true;
+                            //sandwichCorrect = true;
                         }   
                         else
                         {
-                            reasonsWhy.Add("... your isn't close enough to the tip threshold!");
+                            reasonsWhy.Add("... your sandwich isn't close enough to the tip threshold!");
                             DebugMsg("Calculated solution:");
                             for (int i = 0; i < 5; i++)
                             {
@@ -522,18 +674,13 @@ public class subwayScript : MonoBehaviour {
                                 if (tempRemovals[i] != 0)
                                     DebugMsg("Remove " + tempRemovals[i] + " " + stageNames[i] + "...");
                             }
-
-                            if (replaceTuna) // put the tuna back
-                            {
-                                order[4].Remove(1);
-                                order[1].Add(0);
-                            }
+                            sandwichCorrect = false;
                         }
                     }
                     else
                     {
                         DebugMsg("Your sandwich is valid and is close enough to the tip threshold!");
-                        sandwichCorrect = true;
+                        //sandwichCorrect = true;
                     }
                 }
 
@@ -546,6 +693,11 @@ public class subwayScript : MonoBehaviour {
                 }
                 else
                 {
+                    if (replaceTuna) // put the tuna back
+                    {
+                        order[4].Remove(1);
+                        order[1].Add(0);
+                    }
                     DebugMsg("Your sandwhich was not valid because:");
                     foreach (var reason in reasonsWhy)
                     {
@@ -563,7 +715,9 @@ public class subwayScript : MonoBehaviour {
             }
         }
 
-        ingredientPosition = Random.Range(0, 6);
+        //ingredientPosition = UnityEngine.Random.Range(0, 6);
+        // was nice to start somewhere random, but breaks the twitch play :(
+        ingredientPosition = 0;
         MoveIngredient(0);
     }
     
@@ -577,7 +731,7 @@ public class subwayScript : MonoBehaviour {
             DebugMsg("The customer is rendered speechless as you hand them the \"sandwich\" you just created.");
             DebugMsg("In your hands is a sopping heap of various sandwich ingredients. Without the necessary bread, it drips down your sleeves and coats the floor.");
             DebugMsg("Your co-worker stares at you in awe. Or fear. Or both. They knew this job was mind-numbing, but they didn't know it was possible for a human being to be this far gone.");
-            if (sandwichMade[2].Contains(9))
+            if (sandwichMade[2].Contains(4))
             {
                 DebugMsg("You even toasted it. You toasted it, and you didn't put any bread. You put a pile of sandwich ingredients in the oven and had, like, a full minute to think about what you'd done.");
                 DebugMsg("The toaster oven is now coated in a puddle of melted cheese and liquefied meat.");
@@ -619,4 +773,66 @@ public class subwayScript : MonoBehaviour {
     {
         Debug.LogFormat("[Subway #{0}] {1}", moduleId, msg.Replace('\n', ' '));
     }
+
+// Teeper code
+    #pragma warning disable 414
+    	private readonly string TwitchHelpMessage = @"Use !{0} order to take the customer's order, and !{0} repeat to have them repeat it. Use !{0} prepare [ingredient] [ingredient] etc. to submit your masterpiece to the customer. Use !{0} keep adding [ingredient] to give the customer way too much of one item. Make sure to use only the first word of each ingredient or modification.";
+    #pragma warning restore 414
+
+	KMSelectable[] ProcessTwitchCommand(string command)
+	{
+		command = command.Trim().ToLowerInvariant();
+        int ProcessTwitchCommand = 0;
+		if (command == "order" || command == "repeat")
+		{
+			// Presses repeat since orderSelectable turns into next button
+			return new[] {repeatSelectable};
+		} else if (command.Split()[0] == "prepare")
+		{
+            pressno = 0;
+			string[] prepared = command.Split().Skip(1).ToArray();
+            KMSelectable[] retP = new KMSelectable[prepared.Length + sortTPList.Length + 5];
+            int nextCounter = 0;
+            foreach (var item in sortTPList)
+            {
+                if (prepared.Contains(item))
+                    retP = AddUp(retP, ingredientSelectable);
+                retP = AddUp(retP, arrowSelectables[1]);
+                nextCounter += 1;
+                if (nextCounter % 6 == 0)
+                    retP = AddUp(retP, orderSelectable);
+            }
+            return retP;
+		} else if (command.Split()[0] == "keep")
+        {
+            pressno = 0;
+            string keepCoding = command.Split()[2];
+            int loquation = Array.IndexOf(sortTPList, keepCoding);
+            KMSelectable[] retK = new KMSelectable[(loquation / 6) + (loquation % 6) + 30];
+            for (int i = 0; i < (loquation / 6); i++)
+                retK = AddUp(retK, orderSelectable);
+            for (int i = 0; i < (loquation % 6); i++)
+                retK = AddUp(retK, arrowSelectables[1]);
+            for (int i = 0; i < 30; i++)
+                retK = AddUp(retK, ingredientSelectable);
+            return retK;
+        }
+		return null;
+	}
+
+    KMSelectable[] AddUp(KMSelectable[] inArr, KMSelectable press)
+    {
+        inArr[pressno] = press;
+        pressno += 1;
+        return inArr;
+    }
+
+	// Runs when !solve is used; Changes the input text to the answer and makes the solve sounds, then solves the module
+	void TwitchHandleForcedSolve()
+	{
+		// TODO
+		GetComponent<KMBombModule>().HandlePass();
+		solved = true;
+	}
+
 }
