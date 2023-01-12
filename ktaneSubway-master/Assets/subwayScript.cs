@@ -26,7 +26,7 @@ public class subwayScript : MonoBehaviour {
     static int moduleIdCounter = 1;
     int moduleId;
     bool solved = false;
-    private bool orderPlaying = false;
+    static bool orderPlaying = false;
 
     private double Voltage() // shamelessly stolen from Access Codes, thanks GhostSalt
     {
@@ -71,7 +71,7 @@ public class subwayScript : MonoBehaviour {
 
     List<int>[] order = { new List<int>(), new List<int>(), new List<int>(), new List<int>(), new List<int>() };
     List<int>[] sayorder = { new List<int>(), new List<int>(), new List<int>(), new List<int>(), new List<int>() };
-    int ingredientCount = 0;
+    //int ingredientCount = 0;
     bool melt = false;
 
     bool pizzaTime = false;
@@ -214,7 +214,7 @@ public class subwayScript : MonoBehaviour {
             amounts = new int[] { 1, UnityEngine.Random.Range(1, 4), UnityEngine.Random.Range(1, 3), UnityEngine.Random.Range(1, 6), UnityEngine.Random.Range(1, 5) };
 
             int[] shuffledMeaties = { 0, 1, 2, 3, 4, 5 };
-            int[] shuffledCheeses = { 0, 1, 2, 3, 4 };
+            int[] shuffledCheeses = { 0, 1, 2, 3, 4 }; // dont want to add toast randomly, that's set later
             int[] shuffledVeggies = { 0, 1, 2, 3, 4, 5 };
             int[] shuffledCondoms = { 0, 1, 2, 3, 4, 5 };
             shuffledMeaties.Shuffle();
@@ -448,6 +448,7 @@ public class subwayScript : MonoBehaviour {
         MoveIngredient(0);
     }
 
+    // when orderSelectable is pressed
     IEnumerator AdvanceStage()
     {
         if (!orderActivated)
@@ -645,9 +646,12 @@ public class subwayScript : MonoBehaviour {
                     Module.HandleStrike();
                 }
 
+                // cleanup after a strike
                 currentStage = 0;
-                for (int i = 0; i < 5; i++) { sandwichMade[i].Clear(); }
+                for (int i = 0; i < 5; i++)
+                    sandwichMade[i].Clear();
                 orderActivated = false;
+                trayCoverObject.SetActive(true);
                 buttonText.text = "ORDER";
             }
         }
@@ -658,6 +662,7 @@ public class subwayScript : MonoBehaviour {
         MoveIngredient(0);
     }
 
+    // Finds a possible solution for the logging and autosolver
     List<int>[] FindPossibleAnswer()
     {
         if (replaceTuna)
@@ -670,6 +675,7 @@ public class subwayScript : MonoBehaviour {
         int[] tempModifications = { 0, 0, 0, 0, 0 };
         int[] tempChanges = { 0, 0, 0, 0, 0 };
         int[] tempRemovals = { 0, 0, 0, 0, 0 };
+        // thanks Timwi, unlinks the reference types
         var possibleOrder = order.Select(list => list.ToList()).ToArray();
         bool catsup = false;
 
@@ -694,8 +700,9 @@ public class subwayScript : MonoBehaviour {
         {
             tempModifications[2]++;
             tempChanges[2]++;
-        }
+        } // always change cheese
 
+        // going from most expensive to least expensive change should always give best answer
         while (remainingThreshold >= 9 && order[1].Count() - tempModifications[1] > 0)
         {
             tempModifications[1]++;
@@ -753,6 +760,7 @@ public class subwayScript : MonoBehaviour {
             if (tempChanges[i] != 0)
             {
                 DebugMsg("Change " + tempChanges[i] + " " + stageNames[i] + "...");
+                // for changes, adds 1 to ingredient value until that value not present
                 for (int j = 0; j < tempChanges[i]; j++)
                 {
                     tempVal = (i > 0) ? ((possibleOrder[i][j] + 1) % 6) : ((possibleOrder[i][j] + 1) % 3);
@@ -764,6 +772,7 @@ public class subwayScript : MonoBehaviour {
             if (tempRemovals[i] != 0)
             {
                 DebugMsg("Remove " + tempRemovals[i] + " " + stageNames[i] + "...");
+                // for removals, deletes at end instead of first index so doesn't conflict with previous changes
                 for (int j = 0; j < tempRemovals[i]; j++)
                     possibleOrder[i].RemoveAt(possibleOrder[i].Count - 1);
             }
@@ -784,6 +793,7 @@ public class subwayScript : MonoBehaviour {
         return possibleOrder;
     }
     
+    // Runs when you don't submit bread. Idiot.
     IEnumerator ATONEFORYOURSINS()
     {
         DebugMsg("That was incorrect, because...");
@@ -819,6 +829,7 @@ public class subwayScript : MonoBehaviour {
         }
     }
 
+    // Special solving method for when asMuch occurs
     IEnumerator AsMuchHandler()
     {
         asMuchCounter++;
@@ -835,6 +846,12 @@ public class subwayScript : MonoBehaviour {
     void DebugMsg(string msg)
     {
         Debug.LogFormat("[Subway #{0}] {1}", moduleId, msg.Replace('\n', ' '));
+    }
+
+    // prevents softlocking when bomb explodes mid speech
+    void OnDestroy()
+    {
+        orderPlaying = false;
     }
 
     // Teeper code
@@ -908,7 +925,7 @@ public class subwayScript : MonoBehaviour {
                 arrowSelectables[1].OnInteract();
             for (int k = 0; k < 30; k++)
                 ingredientSelectable.OnInteract();
-            trayCoverObject.SetActive(false);
+            trayCoverObject.SetActive(true);
         }
         else if (pizzaTime)
         {
