@@ -59,7 +59,6 @@ public class subwayScript : MonoBehaviour {
     {
         "white", "multigrain", "gluten", "whole", "cheese", "pepperoni", "tuna", "chicken", "turkey", "ham", "pastrami", "mystery", "american", "mozzarella", "provolone", "swiss", "cheddar", "toast", "olives", "lettuce", "pickles", "onions", "tomatoes", "jalapenos", "ketchup", "mayonnaise", "ranch", "salt", "pepper", "vinegar"
     };
-    int pressno = 0;
     List<int>[] auto;
 
     bool orderActivated = false;
@@ -856,57 +855,75 @@ public class subwayScript : MonoBehaviour {
 
     // Teeper code
     #pragma warning disable 414
-    	private readonly string TwitchHelpMessage = @"Use !{0} order to take the customer's order, and !{0} repeat to have them repeat it. Use !{0} prepare [ingredient] [ingredient] etc. to submit your masterpiece to the customer. Use !{0} keep adding [ingredient] to give the customer way too much of one item. Make sure to use only the first word of each ingredient or modification.";
+    	private readonly string TwitchHelpMessage = @"Use !{0} order to take the customer's order, and !{0} repeat to have them repeat it. Use !{0} prepare [ingredient] [ingredient] etc. to submit your masterpiece to the customer. Use !{0} keep adding [ingredient] to give the customer way too much of one item. Make sure to use only the first word of each ingredient or modification. Use !{0} ingredients to see a list of valid ingredients.";
     #pragma warning restore 414
 
-	KMSelectable[] ProcessTwitchCommand(string command)
+	IEnumerator ProcessTwitchCommand(string command)
 	{
 		command = command.Trim().ToLowerInvariant();
         int ProcessTwitchCommand = 0;
 		if (command == "order" || command == "repeat")
 		{
 			// Presses repeat since orderSelectable turns into next button
-			return new[] {repeatSelectable};
+			repeatSelectable.OnInteract();
+        } else if (command == "ingredients")
+        {
+            yield return "sendtochat Acceptable ingredient names are: " + String.Join(", ", sortTPList);
 		} else if (command.Split()[0] == "prepare")
 		{
-            pressno = 0;
 			string[] prepared = command.Split().Skip(1).ToArray();
-            KMSelectable[] retP = new KMSelectable[prepared.Length + sortTPList.Length + 5];
             int nextCounter = 0;
+            foreach (var submitted in prepared)
+            {
+                if (!(sortTPList.Contains(submitted)))
+                    yield return "sendtochat Sorry, I'm not quite sure what a " + submitted + " is.";
+            }
+            orderActivated = true;
+            buttonText.text = "NEXT";
+            DebugMsg("Order button pressed. Order up!");
+            trayCoverObject.SetActive(false);
+            MoveIngredient(0);
             foreach (var item in sortTPList)
             {
                 if (prepared.Contains(item))
-                    retP = AddUp(retP, ingredientSelectable);
-                retP = AddUp(retP, arrowSelectables[1]);
+                    ingredientSelectable.OnInteract();
+                arrowSelectables[1].OnInteract();
                 nextCounter += 1;
                 if (nextCounter % 6 == 0)
-                    retP = AddUp(retP, orderSelectable);
+                    orderSelectable.OnInteract();
             }
-            return retP;
-		} else if (command.Split()[0] == "keep")
+		} else if ((command.Split()[0] == "keep") && (command.Split().Length == 3))
         {
-            pressno = 0;
             string keepCoding = command.Split()[2];
+            if (!(sortTPList.Contains(keepCoding)))
+                yield return "sendtochat Sorry, I'm not quite sure what a " + keepCoding + " is.";
+            orderActivated = true;
+            buttonText.text = "NEXT";
+            DebugMsg("Order button pressed. Order up!");
+            trayCoverObject.SetActive(false);
+            MoveIngredient(0);
             int loquation = Array.IndexOf(sortTPList, keepCoding);
-            KMSelectable[] retK = new KMSelectable[(loquation / 6) + (loquation % 6) + 30];
             for (int i = 0; i < (loquation / 6); i++)
-                retK = AddUp(retK, orderSelectable);
+                orderSelectable.OnInteract();
             for (int i = 0; i < (loquation % 6); i++)
-                retK = AddUp(retK, arrowSelectables[1]);
+                arrowSelectables[1].OnInteract();
             for (int i = 0; i < 30; i++)
-                retK = AddUp(retK, ingredientSelectable);
-            return retK;
+                ingredientSelectable.OnInteract();
+        } else
+        {
+            yield return "sendtochat Sorry, I'm not paid enough to pretend to understand what you said.";
         }
-		return null;
+		yield return null;
 	}
 
+    /*
     // Since I cant do += for KMSelectable[]
     KMSelectable[] AddUp(KMSelectable[] inArr, KMSelectable press)
     {
         inArr[pressno] = press;
         pressno++;
         return inArr;
-    }
+    }*/
 
 	// Runs when !solve is used
 	IEnumerator TwitchHandleForcedSolve()
