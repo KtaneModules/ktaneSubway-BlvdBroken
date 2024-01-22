@@ -4,6 +4,7 @@ using UnityEngine;
 using KModkit;
 using System.Linq;
 using System;
+using System.Reflection;
 
 public class subwayScript : MonoBehaviour {
 
@@ -22,6 +23,7 @@ public class subwayScript : MonoBehaviour {
     public TextMesh ingredientText, buttonText;
 
     public AudioClip[] voiceLines;
+    public AudioClip oatmeal;
 
     static int moduleIdCounter = 1;
     int moduleId;
@@ -164,7 +166,22 @@ public class subwayScript : MonoBehaviour {
             }
             return false;
         };
+        /*GetComponent<KMGameInfo>().OnStateChange += state => {
+            if (state == KMGameInfo.State.PostGame)
+            {
+                if (GetMissionID() == "mod_blvd_oatmeal")
+                {
+                    Audio.PlaySoundAtTransform("oatmeal", transform);
+                    DebugMsg("Oh, oh, the missouri");
+                }
+            }
+        };*/
     }
+
+    /*void StateChange () {
+      // :))) (plays sound when blowing up or solving on oatmeal bomb)
+        
+    }*/
 
     private void Start()
     {
@@ -847,10 +864,23 @@ public class subwayScript : MonoBehaviour {
         Debug.LogFormat("[Subway #{0}] {1}", moduleId, msg.Replace('\n', ' '));
     }
 
-    // prevents softlocking when bomb explodes mid speech
     void OnDestroy()
     {
+        // prevents softlocking when bomb explodes mid speech
         orderPlaying = false;
+    }
+
+    private string GetMissionID () {
+        try {
+            Component gameplayState = GameObject.Find("GameplayState(Clone)").GetComponent("GameplayState");
+            Type type = gameplayState.GetType();
+            FieldInfo fieldMission = type.GetField("MissionToLoad", BindingFlags.Public | BindingFlags.Static);
+            return fieldMission.GetValue(gameplayState).ToString();
+        }
+
+        catch (NullReferenceException) {
+             return "undefined";
+        }
     }
 
     // Teeper code
@@ -871,7 +901,7 @@ public class subwayScript : MonoBehaviour {
             yield return "sendtochat Acceptable ingredient names are: " + String.Join(", ", sortTPList);
 		} else if (command.Split()[0] == "prepare")
 		{
-			string[] prepared = command.Split().Skip(1).ToArray();
+			string[] prepared = command.Split().Skip(1).Where(s => !(string.IsNullOrEmpty(s))).ToArray();
             int nextCounter = 0;
             foreach (var submitted in prepared)
             {
